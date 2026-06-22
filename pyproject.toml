@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]  # make top-level modules (app, ai_analyst, phishsentinel) importable
 addopts = "-q"
 filterwarnings = ["ignore::UserWarning"]
 
