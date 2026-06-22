@@ -1,0 +1,19 @@
+[project]
+name = "phishsentinel"
+version = "0.1.0"
+description = "PhishSentinel — an end-to-end MLOps pipeline for phishing/network-security detection with a Gemini L2 analyst."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::UserWarning"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["artifacts", "mlruns", "logs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "UP"]
+ignore = ["E501"]  # long lines are tolerated (some prompts/strings are intentionally long)

@@ -1,0 +1,10 @@
+# Development & CI dependencies (installs runtime deps too)
+-r requirements.txt
+
+# ---- Testing ----
+pytest==8.3.4
+httpx==0.28.1            # required by FastAPI TestClient
+
+# ---- Code quality ----
+ruff==0.8.6
+pre-commit==4.0.1

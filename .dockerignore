@@ -1,0 +1,21 @@
+.git
+.github
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Local state that should NOT be baked into the image
+artifacts/
+mlruns/
+logs/
+*.db
+final_model/
+*.pkl
+
+# Secrets
+.env

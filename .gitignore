@@ -1,0 +1,37 @@
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local environments
+.env
+.venv/
+env/
+venv/
+
+# MLflow logs and artifacts
+mlruns/
+mlflow.db
+
+# Database files
+*.sqlite
+*.db
+
+# Application logs and local artifacts
+logs/
+artifacts/
+best_model_result/
+prediction_output/
+*.pkl
+
+# Monitoring output & tool caches
+monitoring_reports/
+.pytest_cache/
+.ruff_cache/
+final_model/
+
+# Editor / tooling local config
+.claude/
+.vscode/
+.DS_Store
