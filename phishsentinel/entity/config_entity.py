@@ -84,3 +84,9 @@ class ModelTrainerConfig:
         )
         self.expected_accuracy: float = training_pipeline.MODEL_TRAINER_EXPECTED_ACCURACY
         self.overfitting_threshold: float = training_pipeline.MODEL_TRAINER_OVER_FITTING_THRESHOLD
+
+
+class ModelEvaluationConfig:
+    def __init__(self, training_pipeline_config: TrainingPipelineConfig = None):
+        # Minimum test-F1 gain required to promote a challenger over the champion.
+        self.min_improvement: float = float(os.getenv("MODEL_EVAL_MIN_IMPROVEMENT", "0.0"))

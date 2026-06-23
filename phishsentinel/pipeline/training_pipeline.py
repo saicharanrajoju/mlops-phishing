@@ -3,17 +3,20 @@ import sys
 from phishsentinel.components.data_ingestion import DataIngestion
 from phishsentinel.components.data_transformation import DataTransformation
 from phishsentinel.components.data_validation import DataValidation
+from phishsentinel.components.model_evaluation import ModelEvaluation
 from phishsentinel.components.model_trainer import ModelTrainer
 from phishsentinel.entity.artifact_entity import (
     DataIngestionArtifact,
     DataTransformationArtifact,
     DataValidationArtifact,
+    ModelEvaluationArtifact,
     ModelTrainerArtifact,
 )
 from phishsentinel.entity.config_entity import (
     DataIngestionConfig,
     DataTransformationConfig,
     DataValidationConfig,
+    ModelEvaluationConfig,
     ModelTrainerConfig,
     TrainingPipelineConfig,
 )
@@ -72,6 +75,22 @@ class TrainingPipeline:
         except Exception as e:
             raise PhishSentinelException(e, sys) from e
 
+    def start_model_evaluation(
+        self,
+        data_validation_artifact: DataValidationArtifact,
+        model_trainer_artifact: ModelTrainerArtifact,
+    ) -> ModelEvaluationArtifact:
+        try:
+            model_eval_config = ModelEvaluationConfig(training_pipeline_config=self.training_pipeline_config)
+            model_evaluation = ModelEvaluation(
+                model_eval_config=model_eval_config,
+                valid_test_file_path=data_validation_artifact.valid_test_file_path,
+                candidate_version=model_trainer_artifact.registered_version,
+            )
+            return model_evaluation.initiate_model_evaluation()
+        except Exception as e:
+            raise PhishSentinelException(e, sys) from e
+
     def run_pipeline(self) -> ModelTrainerArtifact:
         try:
             logging.info("===== Starting Training Pipeline Execution =====")
@@ -87,8 +106,18 @@ class TrainingPipeline:
             # 3. Transformation
             data_transformation_artifact = self.start_data_transformation(data_validation_artifact)
 
-            # 4. Trainer
+            # 4. Trainer (registers a new model version)
             model_trainer_artifact = self.start_model_trainer(data_transformation_artifact)
+
+            # 5. Evaluation gate (promotes to @production only if it beats the champion)
+            if model_trainer_artifact.registered_version:
+                eval_artifact = self.start_model_evaluation(data_validation_artifact, model_trainer_artifact)
+                logging.info(
+                    f"Model Evaluation: accepted={eval_artifact.is_model_accepted}, "
+                    f"candidate_f1={eval_artifact.candidate_f1:.4f}, champion_f1={eval_artifact.champion_f1:.4f}"
+                )
+            else:
+                logging.warning("No registered version; skipping evaluation/promotion.")
 
             logging.info("===== Training Pipeline Completed Successfully =====")
             return model_trainer_artifact

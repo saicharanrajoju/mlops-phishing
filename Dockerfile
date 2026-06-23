@@ -17,5 +17,6 @@ COPY . .
 
 EXPOSE 8000
 
-# Serving entrypoint. (The MLflow service in docker-compose overrides this command.)
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Serving entrypoint. Shell form so $PORT (injected by hosts like Render) is honored;
+# defaults to 8000 locally. The MLflow service in docker-compose overrides this command.
+CMD uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}

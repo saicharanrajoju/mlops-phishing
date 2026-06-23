@@ -51,6 +51,9 @@ def register_model(model, input_example=None) -> str | None:
             registered_model_name=REGISTERED_MODEL_NAME,
             signature=signature,
             input_example=input_example,
+            # The default skops serializer rejects XGBoost types; cloudpickle handles
+            # the full preprocessor + XGBoost/sklearn pipeline.
+            serialization_format="cloudpickle",
         )
         version = getattr(info, "registered_model_version", None)
         if version is None:
@@ -94,6 +97,30 @@ def promote_if_better(version: str, new_f1: float) -> bool:
 
     logging.info(f"Challenger F1={new_f1:.4f} did not beat champion F1={current_f1:.4f}; " "production unchanged.")
     return False
+
+
+def load_model_version(version: str):
+    """Load a specific registered model version (the challenger candidate)."""
+    try:
+        setup_mlflow()
+        return mlflow.sklearn.load_model(f"models:/{REGISTERED_MODEL_NAME}/{version}")
+    except Exception as e:
+        logging.error(f"Could not load model version {version}: {e}")
+        return None
+
+
+def set_production(version: str, f1: float | None = None) -> bool:
+    """Point the @production alias at a version (used by the Model Evaluation gate)."""
+    try:
+        client = MlflowClient()
+        if f1 is not None:
+            client.set_model_version_tag(REGISTERED_MODEL_NAME, version, "test_f1", f"{f1:.6f}")
+        client.set_registered_model_alias(REGISTERED_MODEL_NAME, PRODUCTION_ALIAS, version)
+        logging.info(f"Set @{PRODUCTION_ALIAS} -> version {version}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to set production alias: {e}")
+        return False
 
 
 def load_production_model():

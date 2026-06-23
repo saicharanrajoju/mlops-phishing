@@ -1,0 +1,18 @@
+# Render Blueprint — one-click deploy of the FastAPI app.
+# In Render: New → Blueprint → connect this repo. Render reads this file, builds the
+# Dockerfile, and serves the app. $PORT is injected automatically (the Dockerfile honors it).
+#
+# Free plan spins down on inactivity (first request after idle cold-starts in ~50s).
+services:
+  - type: web
+    name: mlops-phishing
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Optional: add your key in the Render dashboard to enable the live AI agent/reports.
+      - key: GEMINI_API_KEY
+        sync: false

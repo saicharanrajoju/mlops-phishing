@@ -19,7 +19,7 @@ from phishsentinel.entity.artifact_entity import (
 from phishsentinel.entity.config_entity import ModelTrainerConfig
 from phishsentinel.exception.exception import PhishSentinelException
 from phishsentinel.logging.logger import logging
-from phishsentinel.registry.model_registry import promote_if_better, register_model, setup_mlflow
+from phishsentinel.registry.model_registry import register_model, setup_mlflow
 from phishsentinel.utils.main_utils.utils import load_object, save_object
 from phishsentinel.utils.ml_utils.model.estimator import PhishSentinelModel
 
@@ -171,14 +171,12 @@ class ModelTrainer:
                 save_object(file_path=model_save_path, obj=network_model)
                 logging.info(f"Saved PhishSentinelModel wrapper to: {model_save_path}")
 
-                # Register a native sklearn pipeline (preprocessor + classifier) to the MLflow
-                # Model Registry, then promote it to @production only if it beats the champion.
+                # Register a native sklearn pipeline (preprocessor + classifier) as a new
+                # version. Promotion to @production is decided later by the Model Evaluation gate.
                 full_pipeline = Pipeline(steps=[("preprocessor", preprocessor), ("classifier", best_model_obj)])
                 feature_cols = [c for c in SCHEMA_COLUMNS if c != TARGET_COLUMN]
                 input_example = pd.DataFrame([[1] * len(feature_cols)], columns=feature_cols)
                 registered_version = register_model(full_pipeline, input_example=input_example)
-                if registered_version:
-                    promote_if_better(registered_version, test_f1)
 
                 # Check for overfitting
                 f1_diff = abs(train_f1 - test_f1)
@@ -205,6 +203,7 @@ class ModelTrainer:
                 trained_model_file_path=model_save_path,
                 train_metric_artifact=train_metrics,
                 test_metric_artifact=test_metrics,
+                registered_version=registered_version,
             )
 
             logging.info("Model Trainer completed successfully.")

@@ -102,6 +102,16 @@ docker compose up --build
 # app: http://localhost:8000   ·   mlflow: http://localhost:5000
 ```
 
+**Cloud (Render, free)** — the repo ships a [`render.yaml`](render.yaml) blueprint and bundles
+the champion model, so the demo works on first boot:
+
+1. Push to GitHub → on [Render](https://render.com): **New → Blueprint** → connect this repo.
+2. Render builds the Dockerfile and serves the app; `$PORT` is wired automatically.
+3. (Optional) add `GEMINI_API_KEY` in the dashboard to enable the live AI agent.
+4. Drop your live URL at the top of this README.
+
+> Free instances cold-start in ~50s after idle.
+
 ---
 
 ## 🧠 How it works

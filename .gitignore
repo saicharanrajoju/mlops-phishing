@@ -35,3 +35,7 @@ final_model/
 .claude/
 .vscode/
 .DS_Store
+
+# ...but DO ship the bundled champion model so the live demo works out of the box
+!final_model/
+!final_model/model.pkl

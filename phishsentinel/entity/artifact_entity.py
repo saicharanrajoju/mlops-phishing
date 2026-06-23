@@ -37,3 +37,13 @@ class ModelTrainerArtifact:
     trained_model_file_path: str
     train_metric_artifact: ClassificationMetricArtifact
     test_metric_artifact: ClassificationMetricArtifact
+    registered_version: str | None = None
+
+
+@dataclass
+class ModelEvaluationArtifact:
+    is_model_accepted: bool
+    candidate_f1: float
+    champion_f1: float  # -1.0 when there is no current champion
+    improvement: float
+    promoted_version: str | None
